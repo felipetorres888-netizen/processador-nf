@@ -1,6 +1,6 @@
 from pathlib import Path
 
-import fitz
+import pymupdf as fitz
 import pytest
 
 from src.pdf.reader import PDFInvalidoError, ResultadoExtracao, processar_pdf

@@ -9,7 +9,7 @@ import argparse
 import sys
 from pathlib import Path
 
-from src.pdf.reader import PDFInvalidoError, ResultadoExtracao, processar_pdf
+from src.pdf.reader import ResultadoExtracao, processar_pdf
 
 
 def listar_pdfs(entrada: Path) -> list[Path]:
@@ -44,7 +44,7 @@ def processar_lote(entrada: Path, pasta_saida: Path) -> dict:
                     "erro": None,
                 }
             )
-        except PDFInvalidoError as exc:
+        except Exception as exc:
             erros += 1
             detalhes.append(
                 {
