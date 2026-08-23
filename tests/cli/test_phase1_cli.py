@@ -121,12 +121,15 @@ def test_processar_lote_pdf_escaneado_reporta_nao_nativo(tmp_path):
     pagina.draw_rect(fitz.Rect(50, 50, 200, 200))  # conteudo grafico, sem texto
     doc.save(str(entrada / "escaneada.pdf"))
     doc.close()
+    _criar_pdf_com_texto(entrada / "nativa.pdf", "nota valida com texto suficiente para passar")
     pasta_saida = tmp_path / "saida"
 
     resumo = processar_lote(entrada, pasta_saida)
 
-    assert resumo["processados"] == 1
-    assert resumo["detalhes"][0]["possui_texto_nativo"] is False
+    assert resumo["processados"] == 2
+    detalhes_por_arquivo = {d["arquivo"]: d for d in resumo["detalhes"]}
+    assert detalhes_por_arquivo["escaneada.pdf"]["possui_texto_nativo"] is False
+    assert detalhes_por_arquivo["nativa.pdf"]["possui_texto_nativo"] is True
 
 
 def test_processar_lote_pdf_escaneado_com_texto_real_usa_ocr(tmp_path):
