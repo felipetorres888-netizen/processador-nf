@@ -4,7 +4,19 @@ OCR local só nas páginas que precisarem (§3 do mega prompt).
 
 Reaproveita processar_pdf da Fase 1 (que já garante que só PDFInvalidoError
 escapa, e já decide por página se o texto nativo é suficiente) e só
-adiciona OCR por cima, sem alterar o contrato da Fase 1.
+adiciona OCR por cima.
+
+Contrato de exceções: assim como processar_pdf, processar_pdf_completo
+nunca deixa escapar nada além de PDFInvalidoError (arquivo inexistente,
+corrompido, protegido por senha, ou a reabertura do PDF para renderizar
+páginas para OCR falhando). Uma falha de OCR em UMA página (ex.: Tesseract
+mal configurado, imagem renderizada corrompida, problema no pacote de
+idioma) NÃO propaga e NÃO derruba o arquivo inteiro: ela é isolada por
+página, o texto nativo já extraído para as OUTRAS páginas do mesmo arquivo
+é preservado, e a página que falhou fica marcada com
+origem_por_pagina[i] == "ocr_falhou" (mantendo texto_por_pagina[i] como o
+que a extração nativa da Fase 1 já tinha produzido, tipicamente vazio ou
+insuficiente) em vez de levantar uma exceção.
 """
 
 from __future__ import annotations
@@ -26,7 +38,7 @@ class ResultadoExtracaoCompleto:
     num_paginas: int
     texto_por_pagina: list[str]
     texto_completo: str
-    origem_por_pagina: list[str]  # "texto_nativo" ou "ocr"
+    origem_por_pagina: list[str]  # "texto_nativo", "ocr" ou "ocr_falhou"
 
 
 def processar_pdf_completo(
@@ -55,10 +67,20 @@ def processar_pdf_completo(
             ) from exc
         try:
             for indice in indices_para_ocr:
-                pagina = doc[indice]
-                imagem = renderizar_pagina(pagina, dpi=dpi)
-                imagem_preparada = preprocessar(imagem)
-                texto_final[indice] = ocr_imagem(imagem_preparada)
+                try:
+                    pagina = doc[indice]
+                    imagem = renderizar_pagina(pagina, dpi=dpi)
+                    imagem_preparada = preprocessar(imagem)
+                    texto_final[indice] = ocr_imagem(imagem_preparada)
+                except Exception:
+                    # OCR falhou só nesta página (ex.: Tesseract mal
+                    # configurado, imagem corrompida, problema no pacote de
+                    # idioma). Não deixamos a exceção escapar: mantemos o
+                    # texto nativo já extraído (mesmo que insuficiente) e
+                    # marcamos a origem, para não perder o arquivo inteiro
+                    # nem confundir esta página com uma que nunca precisou
+                    # de OCR ou com uma onde o OCR teve sucesso.
+                    origem_por_pagina[indice] = "ocr_falhou"
         finally:
             doc.close()
 

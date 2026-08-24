@@ -15,6 +15,12 @@ import pytesseract
 from src.ocr.config import OCR_LANG, TESSDATA_DIR, TESSERACT_CMD
 
 pytesseract.pytesseract.tesseract_cmd = TESSERACT_CMD
+# Não usamos o config-string `--tessdata-dir "<caminho>"` do pytesseract (a
+# abordagem original do plano): no Windows, o tokenizador de config-string
+# do próprio Tesseract lida mal com o caminho entre aspas contendo
+# barras invertidas, quebrando a chamada (reproduzido e confirmado durante
+# a revisão da Task 4). TESSDATA_PREFIX é o mecanismo padrão e documentado
+# do Tesseract para isso e funciona corretamente em qualquer plataforma.
 os.environ["TESSDATA_PREFIX"] = TESSDATA_DIR
 
 
