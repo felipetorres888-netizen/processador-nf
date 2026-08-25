@@ -6,7 +6,8 @@
 |---|------|------------------|--------|--------------|
 | 1 | PDF → texto nativo | ✅ Sim (feito localmente) | ✅ Concluída | `f4129ba` |
 | 2 | OCR local (Tesseract) | ✅ Sim (feito localmente) | ✅ Concluída | `93f43a6` |
-| 3 | Extração da NF (número, CNPJ, itens, valores via regex/regras) | ✅ Sim | ⬜ Pendente | — |
+| 3a | Extração da NF — identificação (número, série, CNPJ, chave de acesso, data, valor total) | ✅ Sim | ✅ Concluída | `c6e6ab8` |
+| 3b | Extração da NF — itens (tabela de produtos, spec §11) | ✅ Sim | ⬜ Pendente | — |
 | 4 | JSON estruturado | ✅ Sim | ⬜ Pendente | — |
 | 5 | Markdown legível | ✅ Sim | ⬜ Pendente | — |
 | 6 | Validação matemática (qtd×valor≈total etc.) | ✅ Sim | ⬜ Pendente | — |
