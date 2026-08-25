@@ -49,3 +49,10 @@ def test_extrair_cnpj_ignora_sequencia_de_14_digitos_sem_formatacao_de_cnpj_por_
     resultado = extrair_cnpj(texto)
 
     assert resultado is None
+
+
+def test_cnpj_valido_rejeita_caractere_unicode_digito_nao_decimal_sem_lancar_excecao():
+    # Regression test: unicode digit characters (e.g., superscript-two U+00B2)
+    # pass str.isdigit() but fail int() conversion. Guard must reject them
+    # gracefully without raising ValueError.
+    assert cnpj_valido("6283383200014²") is False
