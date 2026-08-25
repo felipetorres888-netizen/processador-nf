@@ -54,3 +54,17 @@ def test_extrair_chave_acesso_retorna_none_quando_nao_ha_chave():
     resultado = extrair_chave_acesso(texto)
 
     assert resultado is None
+
+
+def test_chave_acesso_valida_rejeita_caractere_unicode_digito_nao_decimal_sem_lancar_excecao():
+    # Regression test: unicode digit characters (e.g., superscript-two U+00B2)
+    # pass str.isdigit() but fail int() conversion. Guard must reject them
+    # gracefully without raising ValueError.
+    assert chave_acesso_valida("1" * 43 + "²") is False
+
+
+def test_chave_acesso_valida_rejeita_todos_digitos_iguais():
+    # Regression test: an all-identical-digit string coincidentally satisfies
+    # the mod-11 arithmetic. This is the most likely output from a
+    # blanked/failed OCR field, so it must be rejected explicitly.
+    assert chave_acesso_valida("0" * 44) is False

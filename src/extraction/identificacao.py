@@ -47,20 +47,31 @@ def extrair_identificacao(texto: str) -> IdentificacaoNF:
     chave = extrair_chave_acesso(texto)
     if chave is None:
         chave_campo = _campo_nao_encontrado()
+        chave_valida = False
     else:
-        valida = chave_acesso_valida(chave)
+        chave_valida = chave_acesso_valida(chave)
         chave_campo = CampoComConfianca(
-            valor=chave, confianca=1.0 if valida else 0.3, origem="regex+dv"
+            valor=chave, confianca=1.0 if chave_valida else 0.3, origem="regex+dv"
         )
 
-    cnpj = extrair_cnpj(texto)
-    if cnpj is None:
-        cnpj_campo = _campo_nao_encontrado()
-    else:
-        valido = cnpj_valido(cnpj)
+    if chave_valida:
+        # A chave de acesso valida encodifica o CNPJ do emitente de forma
+        # autoritativa na posicao [6:20] -- muito mais confiavel do que "o
+        # primeiro CNPJ encontrado no texto livre", que em DANFEs reais
+        # costuma casar primeiro com o CNPJ do destinatario (comprador).
+        cnpj_da_chave = chave[6:20]
         cnpj_campo = CampoComConfianca(
-            valor=cnpj, confianca=1.0 if valido else 0.3, origem="regex+dv"
+            valor=cnpj_da_chave, confianca=1.0, origem="chave_acesso"
         )
+    else:
+        cnpj = extrair_cnpj(texto)
+        if cnpj is None:
+            cnpj_campo = _campo_nao_encontrado()
+        else:
+            valido = cnpj_valido(cnpj)
+            cnpj_campo = CampoComConfianca(
+                valor=cnpj, confianca=1.0 if valido else 0.3, origem="regex+dv"
+            )
 
     numero, serie = extrair_numero_serie(texto)
     data = extrair_data_emissao(texto)

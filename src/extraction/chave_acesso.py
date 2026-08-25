@@ -22,7 +22,9 @@ def _digito_verificador(digitos_43: str) -> int:
 
 
 def chave_acesso_valida(chave: str) -> bool:
-    if len(chave) != 44 or not chave.isdigit():
+    if len(chave) != 44 or not chave.isascii() or not chave.isdigit():
+        return False
+    if len(set(chave)) == 1:
         return False
     return int(chave[-1]) == _digito_verificador(chave[:43])
 

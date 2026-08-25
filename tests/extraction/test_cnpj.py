@@ -56,3 +56,10 @@ def test_cnpj_valido_rejeita_caractere_unicode_digito_nao_decimal_sem_lancar_exc
     # pass str.isdigit() but fail int() conversion. Guard must reject them
     # gracefully without raising ValueError.
     assert cnpj_valido("6283383200014²") is False
+
+
+def test_cnpj_valido_rejeita_todos_digitos_iguais():
+    # Regression test: an all-identical-digit string coincidentally satisfies
+    # the mod-11 arithmetic. This is the most likely output from a
+    # blanked/failed OCR field, so it must be rejected explicitly.
+    assert cnpj_valido("00000000000000") is False

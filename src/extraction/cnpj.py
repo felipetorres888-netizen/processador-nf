@@ -29,6 +29,8 @@ def _digito_verificador(digitos: list[int], pesos: list[int]) -> int:
 def cnpj_valido(cnpj: str) -> bool:
     if len(cnpj) != 14 or not cnpj.isascii() or not cnpj.isdigit():
         return False
+    if len(set(cnpj)) == 1:
+        return False
 
     digitos = [int(c) for c in cnpj]
     dv1 = _digito_verificador(digitos[:12], _PESOS_DV1)
